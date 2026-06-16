@@ -1,0 +1,41 @@
+#root { min-height: 100vh; }
+.app-shell { width: min(100%, 430px); min-height: 100vh; margin: 0 auto; padding: 18px 14px 92px; position: relative; }
+.top-bar, .resource-strip, .battle-header, .bottom-tabs { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h1, h2, p { margin: 0; } h1 { font-size: 34px; letter-spacing: -0.04em; } h2 { font-size: 20px; }
+.eyebrow { color: #ffb5d8; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.muted { color: #cdbed6; }
+.resource-strip { margin: 16px 0; padding: 10px; border: 1px solid #4c315f; border-radius: 18px; background: rgba(22, 13, 33, .76); box-shadow: 0 16px 50px rgba(0,0,0,.25); }
+.resource-strip span { flex: 1; text-align: center; color: #cdbed6; font-size: 12px; } .resource-strip b { display: block; color: #fff; font-size: 17px; }
+.panel { border: 1px solid #543568; border-radius: 24px; background: linear-gradient(180deg, rgba(41, 25, 61, .94), rgba(19, 12, 30, .96)); padding: 16px; box-shadow: 0 18px 70px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.05); }
+.battle-panel { overflow: hidden; }
+.primary, .ghost, .bottom-tabs button, .choice-card, .upgrade-card { border: 0; border-radius: 14px; cursor: pointer; }
+.primary { color: #210d22; background: linear-gradient(180deg, #ffd1eb, #ff83c6); padding: 10px 14px; font-weight: 900; }
+.ghost { color: #f7edf7; background: rgba(255,255,255,.08); padding: 8px 10px; }
+.pixel-stage { height: 280px; margin: 16px -4px; border-radius: 22px; position: relative; overflow: hidden; background: linear-gradient(#1b1634 0 45%, #231432 45% 100%); image-rendering: pixelated; border: 1px solid rgba(255,255,255,.08); }
+.pixel-stage:before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 18px 18px; opacity: .45; }
+.pixel-moon { position: absolute; width: 58px; height: 58px; border-radius: 50%; right: 28px; top: 24px; background: #f4d7ff; box-shadow: 0 0 38px #b46cff; }
+.pixel-hero { position: absolute; left: 84px; bottom: 64px; width: 54px; height: 92px; animation: bob 1.1s steps(2) infinite; }
+.pixel-hero .hair { position: absolute; width: 46px; height: 46px; left: 4px; top: 0; background: #6d3b83; box-shadow: 0 8px #6d3b83, -8px 18px #5a2d74, 34px 18px #5a2d74; }
+.pixel-hero .face { position: absolute; width: 34px; height: 28px; left: 10px; top: 12px; background: #ffd2c7; box-shadow: 8px 10px #ffd2c7, 8px 16px #38203e; }
+.pixel-hero .body { position: absolute; width: 40px; height: 38px; left: 8px; top: 48px; background: #f2d9ff; box-shadow: inset 0 -12px #7d5cff, 0 10px #3d2857; }
+.pixel-hero .cape { position: absolute; width: 24px; height: 48px; left: -8px; top: 44px; background: #c03b73; opacity: .9; }
+.pixel-hero .leg { position: absolute; width: 12px; height: 18px; bottom: -12px; background: #2b213a; } .pixel-hero .leg.left { left: 12px; } .pixel-hero .leg.right { right: 10px; }
+.pixel-sword { position: absolute; left: 138px; bottom: 91px; width: 74px; height: 12px; transform: rotate(-18deg); background: #33233f; animation: slash 1s steps(2) infinite; }
+.pixel-sword span { display: block; width: 58px; height: 8px; margin-left: 14px; background: linear-gradient(90deg, #fff, #9ff4ff, #615bff); box-shadow: 0 0 16px #7df4ff; }
+.pixel-enemy { position: absolute; right: 72px; bottom: 73px; width: 70px; height: 62px; background: #35214b; box-shadow: 0 -18px #4c2b69, 0 12px #1b1128; animation: enemyBob 1.4s steps(2) infinite; }
+.pixel-enemy .eye { position: absolute; top: 20px; width: 10px; height: 10px; background: #ff5c9e; box-shadow: 0 0 12px #ff5c9e; } .pixel-enemy .left { left: 16px; } .pixel-enemy .right { right: 16px; }
+.floor-shadow { position: absolute; left: 46px; right: 46px; bottom: 48px; height: 12px; background: rgba(0,0,0,.35); border-radius: 50%; }
+.is-tired .pixel-sword span { background: linear-gradient(90deg, #fff, #ff7c9f); box-shadow: 0 0 20px #ff477e; }
+@keyframes bob { 50% { transform: translateY(-6px); } } @keyframes enemyBob { 50% { transform: translateY(4px); } } @keyframes slash { 50% { transform: rotate(-10deg) translateX(8px); } }
+.combat-bars { display: grid; gap: 10px; } .combat-bars label { display: grid; gap: 5px; color: #ddcfe7; font-size: 12px; } meter { width: 100%; height: 16px; }
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; } .stat-grid span { background: rgba(255,255,255,.07); padding: 10px; border-radius: 12px; color: #d8c8e4; } .stat-grid b { color: #fff; }
+.upgrade-list, .choice-list { display: grid; gap: 10px; margin-top: 14px; }
+.upgrade-card, .choice-card { text-align: left; color: #fff; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.08); padding: 12px; display: grid; gap: 5px; }
+.upgrade-card:disabled { opacity: .45; cursor: not-allowed; } .upgrade-card small, .choice-card span { color: #d7c4e3; }
+.story-panel { display: grid; gap: 12px; line-height: 1.65; } .log-box { display: grid; gap: 8px; max-height: 220px; overflow: auto; padding-top: 8px; } .log-box p { background: rgba(0,0,0,.18); padding: 9px; border-radius: 10px; color: #ddcfe7; font-size: 13px; }
+.bottom-tabs { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); width: min(calc(100% - 28px), 402px); padding: 8px; background: rgba(14, 8, 23, .92); border: 1px solid #513465; border-radius: 22px; backdrop-filter: blur(14px); }
+.bottom-tabs button { flex: 1; color: #d6c7df; padding: 12px; background: transparent; font-weight: 800; } .bottom-tabs button.active { color: #211124; background: #ffc7e5; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 10; display: grid; place-items: end center; padding: 18px; background: rgba(5, 3, 9, .72); backdrop-filter: blur(4px); }
+.choice-modal { width: min(100%, 430px); border: 1px solid #805798; border-radius: 24px; padding: 16px; background: #1d122b; box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+.choice-card:hover, .upgrade-card:not(:disabled):hover, .primary:hover { transform: translateY(-1px); filter: brightness(1.08); }
+@media (max-width: 370px) { .pixel-stage { height: 242px; } .pixel-hero { left: 58px; } .pixel-enemy { right: 42px; } }

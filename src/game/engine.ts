@@ -1,0 +1,269 @@
+import { createEnemy, IMPRINT_CHOICES, MEMORY_CHOICES, UPGRADES } from './data'
+import type { Choice, ChoiceEffect, GameState, PermanentUpgrades, RunModifiers, RunState } from './types'
+
+const emptyUpgrades = (): PermanentUpgrades => ({
+  bladeTraining: 0,
+  evasiveMemory: 0,
+  bossPattern: 0,
+  timeAdaptation: 0,
+  sistersFencing: 0,
+  steadyGrip: 0,
+})
+
+const emptyModifiers = (): RunModifiers => ({
+  attackMultiplier: 0,
+  critChance: 0,
+  critDamage: 0,
+  lifesteal: 0,
+  shield: 0,
+  bossDamage: 0,
+  dodge: 0,
+  goldMultiplier: 0,
+  incomingDamageMultiplier: 0,
+  extraStrikeChance: 0,
+})
+
+function addLog(state: GameState, message: string): GameState {
+  return { ...state, log: [message, ...state.log].slice(0, 12) }
+}
+
+function deriveMaxHp(upgrades: PermanentUpgrades): number {
+  return 100 + upgrades.bladeTraining * 8 + upgrades.steadyGrip * 16
+}
+
+function createRun(upgrades: PermanentUpgrades): RunState {
+  const maxHp = deriveMaxHp(upgrades)
+  return {
+    floor: 1,
+    hp: maxHp,
+    maxHp,
+    gold: 0,
+    bladePower: 0,
+    totalKills: 0,
+    bladeBroken: false,
+    enemy: createEnemy(1),
+    modifiers: emptyModifiers(),
+    choicesTaken: [],
+    resolvedChoiceFloors: [],
+  }
+}
+
+export function createNewGame(now = Date.now()): GameState {
+  const upgrades = emptyUpgrades()
+  return {
+    version: 1,
+    now,
+    permanent: {
+      memoryShards: 0,
+      loopCount: 0,
+      upgrades,
+    },
+    run: createRun(upgrades),
+    records: {
+      highestFloor: 1,
+      bossesDefeated: 0,
+    },
+    story: {
+      seenIntro: false,
+      unlockedLogs: [],
+    },
+    offline: {
+      lastSeenAt: now,
+    },
+    log: ['리아가 검을 다시 잡았다.'],
+  }
+}
+
+function deterministicPick<T>(items: T[], seed: number, count: number): T[] {
+  const pool = [...items]
+  const picked: T[] = []
+  let x = Math.max(1, seed)
+  while (picked.length < count && pool.length) {
+    x = (x * 9301 + 49297) % 233280
+    const index = x % pool.length
+    picked.push(pool.splice(index, 1)[0])
+  }
+  return picked
+}
+
+export function getAvailableChoices(state: GameState): Choice[] {
+  const floor = state.run.floor
+  if (state.run.resolvedChoiceFloors.includes(floor)) return []
+  if (floor > 0 && floor % 10 === 0 && floor % 20 !== 0) {
+    return deterministicPick(MEMORY_CHOICES, floor + state.permanent.loopCount * 17, 3)
+  }
+  if (floor > 1 && floor % 5 === 0 && floor % 20 !== 0) {
+    return deterministicPick(IMPRINT_CHOICES, floor + state.permanent.loopCount * 31, 3)
+  }
+  return []
+}
+
+function mergeEffect(modifiers: RunModifiers, effect: ChoiceEffect): RunModifiers {
+  return {
+    attackMultiplier: modifiers.attackMultiplier + (effect.attackMultiplier ?? 0),
+    critChance: modifiers.critChance + (effect.critChance ?? 0),
+    critDamage: modifiers.critDamage + (effect.critDamage ?? 0),
+    lifesteal: modifiers.lifesteal + (effect.lifesteal ?? 0),
+    shield: modifiers.shield + (effect.shield ?? 0),
+    bossDamage: modifiers.bossDamage + (effect.bossDamage ?? 0),
+    dodge: modifiers.dodge + (effect.dodge ?? 0),
+    goldMultiplier: modifiers.goldMultiplier + (effect.goldMultiplier ?? 0),
+    incomingDamageMultiplier: modifiers.incomingDamageMultiplier + (effect.incomingDamageMultiplier ?? 0),
+    extraStrikeChance: modifiers.extraStrikeChance + (effect.extraStrikeChance ?? 0),
+  }
+}
+
+export function applyChoice(state: GameState, choice: Choice): GameState {
+  const next: GameState = {
+    ...state,
+    run: {
+      ...state.run,
+      modifiers: mergeEffect(state.run.modifiers, choice.effect),
+      choicesTaken: [...state.run.choicesTaken, choice.id],
+      resolvedChoiceFloors: [...state.run.resolvedChoiceFloors, state.run.floor],
+    },
+  }
+  return addLog(next, `${choice.name} 선택 — ${choice.description}`)
+}
+
+function playerDamage(state: GameState): number {
+  const { upgrades } = state.permanent
+  const { modifiers, bladePower, enemy } = state.run
+  const base = 14 + upgrades.bladeTraining * 3 + bladePower
+  const attack = base * (1 + modifiers.attackMultiplier)
+  const critExpected = attack * Math.min(0.8, modifiers.critChance + upgrades.sistersFencing * 0.015) * (0.5 + modifiers.critDamage + upgrades.sistersFencing * 0.04)
+  const extraStrike = attack * modifiers.extraStrikeChance
+  const bossBonus = enemy.isBoss ? attack * (modifiers.bossDamage + upgrades.bossPattern * 0.05) : 0
+  return Math.max(1, Math.round(attack + critExpected + extraStrike + bossBonus))
+}
+
+function enemyDamage(state: GameState): number {
+  const reduction = state.permanent.upgrades.evasiveMemory * 0.035 + state.run.modifiers.dodge * 0.5
+  const incoming = 1 + state.run.modifiers.incomingDamageMultiplier - reduction
+  const shield = state.run.modifiers.shield > 0 ? Math.min(state.run.modifiers.shield, state.run.enemy.attack * 0.35) : 0
+  return Math.max(1, Math.round(state.run.enemy.attack * Math.max(0.35, incoming) - shield))
+}
+
+function rewardForFloor(state: GameState): { gold: number; bladePower: number } {
+  const floor = state.run.floor
+  const multiplier = 1 + state.run.modifiers.goldMultiplier
+  return {
+    gold: Math.round((6 + floor * 2.5) * multiplier * (state.run.enemy.isBoss ? 4 : 1)),
+    bladePower: state.run.enemy.isBoss ? 4 : 1,
+  }
+}
+
+function rewind(state: GameState, now: number): GameState {
+  const reachedFloor = state.run.floor
+  const shards = Math.max(3, Math.floor(reachedFloor / 2) + state.records.bossesDefeated * 2)
+  const highestFloor = Math.max(state.records.highestFloor, reachedFloor)
+  const permanent = {
+    ...state.permanent,
+    memoryShards: state.permanent.memoryShards + shards,
+    loopCount: state.permanent.loopCount + 1,
+  }
+  const next: GameState = {
+    ...state,
+    now,
+    permanent,
+    run: createRun(permanent.upgrades),
+    records: { ...state.records, highestFloor },
+    offline: { lastSeenAt: now },
+  }
+  return addLog(next, `검이 부러졌다. 시간이 되감겼다. 기억 조각 +${shards}`)
+}
+
+export function tickBattle(state: GameState, now = Date.now()): GameState {
+  if (getAvailableChoices(state).length > 0) return { ...state, now }
+
+  let enemy = { ...state.run.enemy }
+  const damage = playerDamage(state)
+  enemy.hp -= damage
+
+  if (enemy.hp <= 0) {
+    const reward = rewardForFloor(state)
+    const nextFloor = state.run.floor + 1
+    const bossKill = state.run.enemy.isBoss ? 1 : 0
+    const next: GameState = {
+      ...state,
+      now,
+      run: {
+        ...state.run,
+        floor: nextFloor,
+        hp: Math.min(state.run.maxHp, state.run.hp + Math.round(state.run.maxHp * 0.16) + Math.round(damage * state.run.modifiers.lifesteal)),
+        gold: state.run.gold + reward.gold,
+        bladePower: state.run.bladePower + reward.bladePower,
+        totalKills: state.run.totalKills + 1,
+        enemy: createEnemy(nextFloor),
+      },
+      records: {
+        highestFloor: Math.max(state.records.highestFloor, nextFloor),
+        bossesDefeated: state.records.bossesDefeated + bossKill,
+      },
+      offline: { lastSeenAt: now },
+    }
+    return addLog(next, `${state.run.floor}층 돌파. 골드 +${reward.gold}`)
+  }
+
+  enemy.elapsedTurns += 1
+  const hp = state.run.hp - enemyDamage({ ...state, run: { ...state.run, enemy } })
+  if (hp <= 0 || (enemy.isBoss && enemy.elapsedTurns >= enemy.turnLimit)) {
+    return rewind({ ...state, run: { ...state.run, hp: 0, enemy, bladeBroken: true } }, now)
+  }
+
+  return {
+    ...state,
+    now,
+    run: { ...state.run, hp, enemy },
+    offline: { lastSeenAt: now },
+  }
+}
+
+export function upgradeCost(state: GameState, id: keyof PermanentUpgrades): number {
+  const def = UPGRADES.find((upgrade) => upgrade.id === id)
+  if (!def) throw new Error(`Unknown upgrade: ${id}`)
+  const level = state.permanent.upgrades[id]
+  return Math.round(def.baseCost * 1.45 ** level)
+}
+
+export function purchaseUpgrade(state: GameState, id: keyof PermanentUpgrades): GameState {
+  const cost = upgradeCost(state, id)
+  if (state.permanent.memoryShards < cost) return addLog(state, '기억 조각이 부족하다.')
+  const upgrades = { ...state.permanent.upgrades, [id]: state.permanent.upgrades[id] + 1 }
+  const maxHp = deriveMaxHp(upgrades)
+  const next: GameState = {
+    ...state,
+    permanent: {
+      ...state.permanent,
+      memoryShards: state.permanent.memoryShards - cost,
+      upgrades,
+    },
+    run: {
+      ...state.run,
+      maxHp,
+      hp: Math.min(maxHp, state.run.hp + 20),
+    },
+  }
+  const name = UPGRADES.find((upgrade) => upgrade.id === id)?.name ?? id
+  return addLog(next, `${name} 강화 완료.`)
+}
+
+export function resolveOfflineRewards(state: GameState, now = Date.now()): GameState {
+  const elapsedMs = Math.max(0, now - state.offline.lastSeenAt)
+  const cappedMs = Math.min(elapsedMs, 8 * 60 * 60 * 1000)
+  const minutes = Math.floor(cappedMs / 60000)
+  if (minutes < 1) return { ...state, now }
+  const adaptation = state.permanent.upgrades.timeAdaptation
+  const gold = Math.round(minutes * (2 + state.records.highestFloor * 0.25) * (1 + adaptation * 0.12))
+  const shards = Math.floor(minutes / 45) * Math.max(1, 1 + Math.floor(adaptation / 3))
+  const next: GameState = {
+    ...state,
+    now,
+    permanent: { ...state.permanent, memoryShards: state.permanent.memoryShards + shards },
+    run: { ...state.run, gold: state.run.gold + gold },
+    offline: { lastSeenAt: now },
+  }
+  return addLog(next, `오프라인 보상: 골드 +${gold}${shards > 0 ? `, 기억 조각 +${shards}` : ''}`)
+}
+
+export { UPGRADES }
