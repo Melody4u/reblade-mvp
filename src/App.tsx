@@ -4,7 +4,7 @@ import { BattleScreen } from './components/BattleScreen'
 import { ChoiceModal } from './components/ChoiceModal'
 import { StoryPanel } from './components/StoryPanel'
 import { UpgradePanel } from './components/UpgradePanel'
-import { applyChoice, createNewGame, getAvailableChoices, resolveOfflineRewards, tickBattle } from './game/engine'
+import { chooseTrait, createNewGame, getAvailableChoices, resolveOfflineRewards, tickBattle } from './game/engine'
 import { clearGame, loadGame, saveGame } from './game/storage'
 import type { GameState } from './game/types'
 
@@ -51,7 +51,7 @@ function App() {
 
       <section className="resource-strip" aria-label="주요 자원">
         <span>최고층 <b>{state.records.highestFloor}</b></span>
-        <span>골드 <b>{state.run.gold}</b></span>
+        <span>골드 <b>{state.permanent.gold}</b></span>
         <span>기억 <b>{state.permanent.memoryShards}</b></span>
       </section>
 
@@ -65,7 +65,7 @@ function App() {
         <button className={tab === 'story' ? 'active' : ''} type="button" onClick={() => setTab('story')}>기억</button>
       </nav>
 
-      <ChoiceModal choices={choices} onChoose={(choice) => setState(applyChoice(state, choice))} />
+      <ChoiceModal choices={choices} onChoose={(choice) => setState(chooseTrait(state, choice))} />
     </main>
   )
 }

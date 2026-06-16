@@ -1,4 +1,4 @@
-export type ChoiceKind = 'imprint' | 'memory'
+export type ChoiceKind = 'trait'
 
 export type ChoiceEffect = Partial<{
   attackMultiplier: number
@@ -40,10 +40,18 @@ export interface PermanentUpgrades {
   steadyGrip: number
 }
 
+export interface EquipmentUpgrades {
+  blade: number
+  armor: number
+  accessory: number
+}
+
 export interface PermanentState {
+  gold: number
   memoryShards: number
   loopCount: number
   upgrades: PermanentUpgrades
+  equipment: EquipmentUpgrades
 }
 
 export interface RunModifiers {
@@ -63,14 +71,12 @@ export interface RunState {
   floor: number
   hp: number
   maxHp: number
-  gold: number
   bladePower: number
   totalKills: number
   bladeBroken: boolean
   enemy: Enemy
   modifiers: RunModifiers
-  choicesTaken: string[]
-  resolvedChoiceFloors: number[]
+  activeTrait: Choice | null
 }
 
 export interface RecordsState {
@@ -92,6 +98,7 @@ export interface GameState {
   now: number
   permanent: PermanentState
   run: RunState
+  pendingTraitChoices: Choice[]
   records: RecordsState
   story: StoryState
   offline: OfflineState
@@ -100,6 +107,13 @@ export interface GameState {
 
 export interface UpgradeDefinition {
   id: keyof PermanentUpgrades
+  name: string
+  description: string
+  baseCost: number
+}
+
+export interface EquipmentDefinition {
+  id: keyof EquipmentUpgrades
   name: string
   description: string
   baseCost: number

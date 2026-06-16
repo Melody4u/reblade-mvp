@@ -35,7 +35,7 @@ export function BattleScreen({ state, onTick }: Props) {
       <div className="stat-grid small">
         <span>검 위력 <b>{state.run.bladePower}</b></span>
         <span>처치 <b>{state.run.totalKills}</b></span>
-        <span>각인 <b>{state.run.choicesTaken.length}</b></span>
+        <span>특성 <b>{state.run.activeTrait?.name ?? '없음'}</b></span>
         <span>루프 <b>{state.permanent.loopCount}</b></span>
       </div>
     </section>

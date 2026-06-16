@@ -7,12 +7,12 @@ interface Props {
 
 export function ChoiceModal({ choices, onChoose }: Props) {
   if (choices.length === 0) return null
-  const title = choices[0].kind === 'imprint' ? '검의 각인이 깨어났다' : '리아가 기억의 파편을 떠올렸다'
   return (
     <div className="modal-backdrop">
-      <section className="choice-modal" aria-label="3택 선택지">
-        <p className="eyebrow">3택 선택</p>
-        <h2>{title}</h2>
+      <section className="choice-modal" aria-label="다음 던전 특성 선택지">
+        <p className="eyebrow">Before Next Loop</p>
+        <h2>다음 던전에 가져갈 특성 선택</h2>
+        <p className="muted">검이 부러진 뒤 떠오른 기억입니다. 하나를 고르면 다시 자동 등반을 시작합니다.</p>
         <div className="choice-list">
           {choices.map((choice) => (
             <button className="choice-card" key={choice.id} type="button" onClick={() => onChoose(choice)}>
