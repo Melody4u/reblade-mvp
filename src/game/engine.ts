@@ -110,7 +110,17 @@ function deterministicPick<T>(items: T[], seed: number, count: number): T[] {
 }
 
 function nextTraitChoices(loopCount: number, floor: number): Choice[] {
-  return deterministicPick(TRAIT_CHOICES, loopCount * 31 + floor * 7, 3)
+  const common = TRAIT_CHOICES.filter((trait) => trait.rarity === 'common')
+  const rare = TRAIT_CHOICES.filter((trait) => trait.rarity === 'rare')
+  const legendary = TRAIT_CHOICES.filter((trait) => trait.rarity === 'legendary')
+  const mythic = TRAIT_CHOICES.filter((trait) => trait.rarity === 'mythic')
+  const seed = loopCount * 31 + floor * 7
+  const first = deterministicPick(common, seed, 1)
+  const secondPool = floor >= 20 || loopCount >= 1 ? [...rare, ...legendary] : rare
+  const second = deterministicPick(secondPool, seed + 11, 1)
+  const finalPool = floor >= 60 || loopCount >= 5 ? [...legendary, ...mythic] : [...rare, ...legendary]
+  const third = deterministicPick(finalPool, seed + 29, 1)
+  return [...first, ...second, ...third]
 }
 
 export function getAvailableChoices(state: GameState): Choice[] {

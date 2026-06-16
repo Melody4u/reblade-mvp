@@ -59,13 +59,15 @@ describe('Re:Blade engine', () => {
     expect(next.records.highestFloor).toBe(21)
     expect(getAvailableChoices(next)).toHaveLength(3)
     expect(getAvailableChoices(next).every((choice) => choice.kind === 'trait')).toBe(true)
+    expect(getAvailableChoices(next).every((choice) => ['common', 'rare', 'legendary', 'mythic'].includes(choice.rarity))).toBe(true)
+    expect(getAvailableChoices(next).some((choice) => choice.rarity !== 'common')).toBe(true)
     expect(next.log[0]).toContain('시간이 되감겼다')
   })
 
   it('pauses auto combat until a post-rewind trait is selected', () => {
     const state = createNewGame(1_700_000_000_000)
     state.pendingTraitChoices = [
-      { id: 'test-trait', kind: 'trait', name: '테스트 특성', description: '공격력 +20%', effect: { attackMultiplier: 0.2 } },
+      { id: 'test-trait', kind: 'trait', rarity: 'rare', name: '테스트 특성', description: '공격력 +20%', effect: { attackMultiplier: 0.2 } },
     ]
     const blocked = tickBattle(state, 1_700_000_001_000)
     expect(blocked.run.floor).toBe(1)

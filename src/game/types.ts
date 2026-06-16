@@ -1,4 +1,5 @@
 export type ChoiceKind = 'trait'
+export type TraitRarity = 'common' | 'rare' | 'legendary' | 'mythic'
 
 export type ChoiceEffect = Partial<{
   attackMultiplier: number
@@ -16,6 +17,7 @@ export type ChoiceEffect = Partial<{
 export interface Choice {
   id: string
   kind: ChoiceKind
+  rarity: TraitRarity
   name: string
   description: string
   effect: ChoiceEffect

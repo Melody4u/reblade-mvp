@@ -3,15 +3,22 @@ import type { Choice, Enemy, EquipmentDefinition, UpgradeDefinition } from './ty
 export const BOSS_FLOORS = [20, 40, 60]
 
 export const TRAIT_CHOICES: Choice[] = [
-  { id: 'flame', kind: 'trait', name: '불꽃 각인', description: '다음 던전 동안 공격력 +15%.', effect: { attackMultiplier: 0.15 } },
-  { id: 'blood', kind: 'trait', name: '피의 각인', description: '다음 던전 동안 흡혈 +3%.', effect: { lifesteal: 0.03 } },
-  { id: 'thunder', kind: 'trait', name: '번개 각인', description: '다음 던전 동안 추가 타격 확률 +12%.', effect: { extraStrikeChance: 0.12 } },
-  { id: 'guard', kind: 'trait', name: '수호 각인', description: '다음 던전 동안 보호막 +12.', effect: { shield: 12 } },
-  { id: 'edge', kind: 'trait', name: '칼날 각인', description: '다음 던전 동안 치명타 확률 +8%.', effect: { critChance: 0.08 } },
-  { id: 'rift', kind: 'trait', name: '균열 각인', description: '공격력 +30%, 받는 피해 +10%.', effect: { attackMultiplier: 0.3, incomingDamageMultiplier: 0.1 } },
-  { id: 'gold-spark', kind: 'trait', name: '황금 균열', description: '다음 던전 동안 골드 획득 +30%.', effect: { goldMultiplier: 0.3 } },
-  { id: 'deep-cut', kind: 'trait', name: '깊은 상처', description: '다음 던전 동안 치명타 피해 +35%.', effect: { critDamage: 0.35 } },
-  { id: 'echo-edge', kind: 'trait', name: '잔향검', description: '다음 던전 동안 보스 피해 +20%.', effect: { bossDamage: 0.2 } },
+  { id: 'flame', kind: 'trait', rarity: 'common', name: '불꽃 각인', description: '공격력 +15%. 칼날에 작은 불씨가 붙는다.', effect: { attackMultiplier: 0.15 } },
+  { id: 'blood', kind: 'trait', rarity: 'common', name: '피의 각인', description: '흡혈 +3%. 전투가 길수록 조금 더 버틴다.', effect: { lifesteal: 0.03 } },
+  { id: 'guard', kind: 'trait', rarity: 'common', name: '수호 각인', description: '보호막 +12. 다음 던전의 초반 안정성이 오른다.', effect: { shield: 12 } },
+  { id: 'edge', kind: 'trait', rarity: 'common', name: '칼날 각인', description: '치명타 확률 +8%. 기본 검격이 날카로워진다.', effect: { critChance: 0.08 } },
+
+  { id: 'thunder', kind: 'trait', rarity: 'rare', name: '번개 각인', description: '추가타 확률 +24%. 검 끝에 튀는 번개가 적을 한 번 더 긁는다.', effect: { extraStrikeChance: 0.24 } },
+  { id: 'gold-spark', kind: 'trait', rarity: 'rare', name: '황금 균열', description: '골드 획득 +45%. 시간의 균열에서 금빛 파편이 떨어진다.', effect: { goldMultiplier: 0.45 } },
+  { id: 'mirror-step', kind: 'trait', rarity: 'rare', name: '거울 발걸음', description: '회피 +9%, 받는 피해 -5%. 이전 루프의 발자국을 따라간다.', effect: { dodge: 0.09, incomingDamageMultiplier: -0.05 } },
+  { id: 'deep-cut', kind: 'trait', rarity: 'rare', name: '깊은 상처', description: '치명타 피해 +55%. 같은 상처를 기억해 더 깊게 벤다.', effect: { critDamage: 0.55 } },
+
+  { id: 'sister-echo', kind: 'trait', rarity: 'legendary', name: '언니의 잔향', description: '추가타 확률 +80%, 추가 검격은 공격력의 일부로 두 번 울린다.', effect: { extraStrikeChance: 0.8, attackMultiplier: 0.18 } },
+  { id: 'last-breath', kind: 'trait', rarity: 'legendary', name: '마지막 호흡', description: '흡혈 +12%, 보호막 +35. 부러지기 직전의 호흡을 되찾는다.', effect: { lifesteal: 0.12, shield: 35 } },
+  { id: 'boss-memory', kind: 'trait', rarity: 'legendary', name: '보스의 사각', description: '보스 피해 +65%, 치명타 확률 +10%. 죽기 전 본 빈틈을 기억한다.', effect: { bossDamage: 0.65, critChance: 0.1 } },
+
+  { id: 'chronos-mercy', kind: 'trait', rarity: 'mythic', name: '시간의 자비', description: '받는 피해 -18%, 흡혈 +20%, 보호막 +60. 던전당 한 번 죽음을 빗겨낸 듯 버틴다.', effect: { incomingDamageMultiplier: -0.18, lifesteal: 0.2, shield: 60 } },
+  { id: 'reblade-awakening', kind: 'trait', rarity: 'mythic', name: 'Re:Blade 각성', description: '공격력 +55%, 보스 피해 +45%, 추가타 확률 +40%. 검이 이전 루프의 모든 파손을 기억한다.', effect: { attackMultiplier: 0.55, bossDamage: 0.45, extraStrikeChance: 0.4 } },
 ]
 
 export const UPGRADES: UpgradeDefinition[] = [
