@@ -4,6 +4,10 @@
 
 > 검이 부러지면, 시간은 다시 시작된다.
 
+## 공개 테스트 URL
+
+https://melody4u.github.io/reblade-mvp/?v=2
+
 ## 실행
 
 ```bash
